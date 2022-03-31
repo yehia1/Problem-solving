@@ -1,28 +1,15 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Mar 31 00:25:18 2022
+# Let code algorithm problems
+#https://leetcode.com/problems/first-bad-version/submissions/  
 
-@author: Yehia Hossam
-"""
 class Solution:
-    def firstBadVersion(beg: int, n: int) -> int:
-        if(beg != n):
-            mid = beg+(n-beg)//2
+    def firstBadVersion(self, n: int) -> int:
+        beg = 1
+        end = n 
+        while(beg <= end):
+            mid = beg + (end-beg)//2
+            if(beg == end):
+                return beg
             if (isBadVersion(mid)):
-                Solution.firstBadVersion(0,mid-1)
+                end = mid
             else : 
-                Solution.firstBadVersion(mid+1, n)
-        else : 
-            return n
-        
-        
-def isBadVersion(i):
-    if(i == input2) : 
-        return True
-    else :
-        return False
-
-input1 = int(input())
-input2 = int(input())    
-    
-print(Solution.firstBadVersion(0, input1))   
+                beg = mid+1
