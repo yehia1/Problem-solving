@@ -22,3 +22,20 @@ class Solution:
             i+=1 
         
         return result    
+    
+    
+class Solution:
+    def lengthOfLongestSubstring(self, s: str) -> int:
+        dict = {}
+        a_pointer = 0
+        b_pointer = 0 
+        result = 0
+        while(b_pointer < len(s)):
+            if(s[b_pointer] not in dict):
+                dict[s[b_pointer]] = a_pointer
+                b_pointer += 1
+                result = max(len(dict),result)
+            else : 
+                del dict[s[a_pointer]]
+                a_pointer += 1
+        return result
