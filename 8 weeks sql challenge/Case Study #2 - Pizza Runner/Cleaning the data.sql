@@ -8,7 +8,7 @@ Create TEMP TABLE cleaned_customer as
         ELSE exclusions
         END AS exclusions,
  	CASE
-    	WHEN extras LIKE '' or exclusions LIKE 'null' THEN NULL
+    	WHEN extras LIKE '' or extras LIKE 'null' THEN NULL
         ELSE extras
         END AS extras,
     order_time
@@ -27,6 +27,7 @@ Create TEMP TABLE cleaned_runner as
         	WHEN distance LIKE '' 
             or distance LIKE 'null' THEN NULL
             WHEN distance LIKE '%km' THEN TRIM('km' FROM distance)
+            Else distance
             END as Float) as distance,
         CAST(CASE
         	WHEN duration LIKE '' 
@@ -37,6 +38,7 @@ Create TEMP TABLE cleaned_runner as
             THEN TRIM('minutes' FROM duration)
             WHEN duration LIKE '%minute'
             THEN TRIM('minute' FROM duration)
+            Else duration
             END as Float) as duration,
         CASE
         	WHEN cancellation LIKE 'NAN' 
@@ -45,9 +47,6 @@ Create TEMP TABLE cleaned_runner as
             ELSE cancellation
             END as cancellation
 FROM pizza_runner.runner_orders;
-
-SELECT * FROM cleaned_runner;
-
 
            
 
