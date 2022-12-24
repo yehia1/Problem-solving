@@ -22,7 +22,7 @@ Create TEMP TABLE cleaned_runner as
         	WHEN pickup_time LIKE '' 
             or pickup_time LIKE 'null' THEN NULL
             ELSE pickup_time
-            END as DATE) as pickup_time,
+            END as TIMESTAMP) as pickup_time,
         Cast(CASE
         	WHEN distance LIKE '' 
             or distance LIKE 'null' THEN NULL
