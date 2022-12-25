@@ -104,8 +104,8 @@ Select order_id,
     Group by order_id,pizza_name
 
 -- What is the total quantity of each ingredient used in all delivered pizzas sorted by most frequent first?
-Select toppings,(count(exclusions) + 
-count(extras) + count(toppings)) as toppings_count
+Select toppings,(count(extras) + count(toppings) - count(exclusions) 
+ )) as toppings_count
 from
 (Select order_id,
     		case
