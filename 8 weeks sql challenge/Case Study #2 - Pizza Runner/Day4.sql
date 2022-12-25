@@ -83,6 +83,59 @@ Select order_id,
       ) as sub
   group by order_id,pizza_name
       		
-    
+-- Generate an alphabetically ordered comma separated ingredient list for each pizza order from the customer_orders table and add a 2x in front of any relevant ingredients
+Select order_id,
+           concat(pizza_name,': ',string_agg(case
+           	when counts > 1 
+      		then '2x' || topping_name 
+      		else topping_name end,',')) as toppings FROM
+(Select order_id,pizza_name,topping_name,count(topping_name) as counts
+	from pizza_toppings t,cleaned_customer c 
+    inner join pizza_recipes r
+    on c.pizza_id = r.pizza_id
+    inner join pizza_names n
+    on c.pizza_id = n.pizza_id
+    where topping_id in (
+      Select 
+      	UNNEST(string_to_array(r.toppings,',') :: int[])
+      )
+      group by order_id,pizza_name,topping_name
+    order by order_id) as sub1
+    Group by order_id,pizza_name
+
+-- What is the total quantity of each ingredient used in all delivered pizzas sorted by most frequent first?
+Select toppings,(count(exclusions) + 
+count(extras) + count(toppings)) as toppings_count
+from
+(Select order_id,
+    		case
+    		when exclusions is not null and t.topping_id IN
+    		(Select 
+    		UNNEST(STRING_TO_ARRAY(exclusions, ',') :: int [])
+    		)
+    		then topping_name
+    		end as exclusions,
+    		case
+    		when extras is not null and t.topping_id IN
+    		(Select 
+    		UNNEST(STRING_TO_ARRAY(extras, ',') :: int [])
+    		)
+    		then topping_name
+    		end as extras,
+         case
+				when topping_id in
+    	(select unnest(string_to_array(toppings,','):: int[]))
+        then topping_name 
+        else null end as toppings
+      from pizza_toppings as t,
+      cleaned_customer as c
+      JOIN pizza_names as n 
+      ON c.pizza_id = n.pizza_id
+      join pizza_recipes r 
+      on r.pizza_id = c.pizza_id
+      order by order_id) as sub
+where toppings is not null
+GROUP BY toppings
+order by 2 desc
 
    
