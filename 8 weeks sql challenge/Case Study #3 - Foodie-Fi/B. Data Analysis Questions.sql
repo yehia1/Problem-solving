@@ -47,7 +47,6 @@ select
     where DATE_PART('day',c.start_date :: timestamp - t.start_date :: timestamp) = 7;
 
 -- What is the number and percentage of customer plans after their initial free trial?
-
 Select next_plan,count(next_plan) as total_ranscations,
 Concat(Round(100 * count(next_plan) :: Numeric / (Select count(distinct customer_id) as number_of_customers from subscriptions),1),'%')
 from(
@@ -61,5 +60,40 @@ FROM subscriptions) sub1
 where next_plan is not null
 group by next_plan
 order by next_plan
+
+--What is the customer count and percentage breakdown of all 5 plan_name values at 2020-12-31?
+with next_plan as (
+SELECT 
+  customer_id, 
+  plan_id, 
+  start_date,
+  LEAD(start_date, 1) OVER(PARTITION BY customer_id ORDER BY start_date) as next_date
+FROM subscriptions
+WHERE start_date <= '2020-12-31')
+
+ SELECT plan_id, COUNT(DISTINCT customer_id) AS customers
+    FROM next_plan
+    WHERE (next_date IS NOT NULL AND (start_date < '2020-12-31' AND next_date > '2020-12-31'))
+      OR (next_date IS NULL AND start_date < '2020-12-31')
+    GROUP BY plan_id;
+    
+-- How many customers have upgraded to an annual plan in 2020?
+Select count(distinct customer_id) as total_annual
+from subscriptions
+where plan_id = 3 and start_date >= '2020-01-01' and start_date 
+< '2020-12-31';
+
+--How many days on average does it take for a customer to an annual plan ?
+Select Round(avg(DATE_PART('day', next_date :: timestamp - start_date :: timestamp))) as average_days_to_annual
+from
+(Select customer_id,plan_id,
+LEAD(plan_id, 1) OVER(PARTITION BY customer_id ORDER BY plan_id) as next_plan,
+start_date,
+LEAD(start_date, 1) OVER(PARTITION BY customer_id ORDER BY start_date) as next_date
+from subscriptions) sub1
+where next_plan = 3;
+--
+
+
 
 
