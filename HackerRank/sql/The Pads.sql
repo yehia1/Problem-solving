@@ -9,9 +9,13 @@ where [occupation_count] is the number of occurrences of an occupation in OCCUPA
 
 Note: There will be at least two entries in the table for each type of occupation.
 */
-select concat(Name,'(',SUBSTRING(occupation,1,1),')') from OCCUPATIONS
-order by Name asc
+select 
+    concat(Name,'(',left(Occupation,1),')') from OCCUPATIONS 
+    order by Name;
 
-select concat('There are a total of ',count(occupation),' ',lower(OCCUPATION),'s.')from OCCUPATIONS
-group by occupation
-order by count(occupation) asc,occupation asc
+Select concat('There are a total of ',counts,' ',lower(Occupation),'s.')
+from
+(Select Occupation,count(Occupation) as counts
+from Occupations
+group by 1
+order by 2 asc,1 asc) as sub1
