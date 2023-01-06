@@ -17,3 +17,9 @@ where week_numbers not in
 Select year, count(transactions)
 from clean_weekly_sales 
 group by year
+
+-- What is the total sales for each region for each month?
+Select region,month,sum(sales)
+from clean_weekly_sales
+group by region,month
+order by region,month
