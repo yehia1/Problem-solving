@@ -3,3 +3,17 @@ Select
 	To_Char(Date,'Day')
     from clean_weekly_sales
     Limit 1;
+
+
+-- What range of week numbers are missing from the dataset?
+With weeks as 
+(Select Generate_series(1,52) as week_numbers)
+
+Select * from weeks
+where week_numbers not in 
+(Select week from clean_weekly_sales);
+
+--How many total transactions were there for each year in the dataset?
+Select year, count(transactions)
+from clean_weekly_sales 
+group by year
