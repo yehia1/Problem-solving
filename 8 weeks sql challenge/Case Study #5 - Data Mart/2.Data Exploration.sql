@@ -23,3 +23,9 @@ Select region,month,sum(sales)
 from clean_weekly_sales
 group by region,month
 order by region,month
+
+-- What is the total count of transactions for each platform
+Select platform,count(transactions)
+from clean_weekly_sales
+group by platform	
+order by platform
