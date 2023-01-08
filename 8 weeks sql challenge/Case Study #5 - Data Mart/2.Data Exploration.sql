@@ -29,3 +29,35 @@ Select platform,count(transactions)
 from clean_weekly_sales
 group by platform	
 order by platform
+
+
+--What is the percentage of sales for Retail vs Shopify for each month?
+
+with platform_monthly_sales as(
+Select month,platform,sum(sales) total_platform_month
+from clean_weekly_sales
+group by month,platform	
+order by month,platform),
+
+monthly_sales as 
+(SELECT month,sum(sales) total_month
+from clean_weekly_sales
+group by month
+order by month)
+
+Select m.month,
+	Round(100 *min(case 
+    	when platform = 'Retail'
+        then total_platform_month :: Numeric/ total_month :: Numeric
+    end),2)as retail_percent,
+    Round(100*min(case 
+    	when platform = 'Shopify'
+        then total_platform_month :: Numeric/ total_month :: Numeric
+    end),2) as Shopify_percent
+from monthly_sales m
+inner join platform_monthly_sales p
+on m.month = p.month
+group by 1
+
+
+
