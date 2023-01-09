@@ -91,3 +91,12 @@ SELECT age_band,
     where platform = 'Retail'
     Group by 1,2
     order by 3 desc
+
+
+--Can we use the avg_transaction column to find the average transaction size for each year for Retail vs Shopify? If not - how would you calculate it instead?
+Select year,platform,
+	Round(avg(avg_transaction)) avg_transaction,
+    sum(sales)/sum(transactions) as avg_calculated_transcations
+    from clean_weekly_sales
+    group by 1,2
+    order by 1,2
