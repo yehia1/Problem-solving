@@ -60,4 +60,25 @@ on m.month = p.month
 group by 1
 
 
+-- What is the percentage of sales by demographic for each year in the dataset?
+With demograpic_sales as (
+Select year,demographic,sum(sales) yearly_sales
+from clean_weekly_sales
+Group By year,demographic
+order By year,demographic)
+
+Select year, 
+  ROUND(100 * MAX 
+    (CASE WHEN demographic = 'Couples' THEN yearly_sales ELSE NULL END) / 
+      SUM(yearly_sales),2) AS couples_percentage,
+  ROUND(100 * MAX 
+    (CASE WHEN demographic = 'Families' THEN yearly_sales ELSE NULL END) / 
+      SUM(yearly_sales),2) AS families_percentage,
+  ROUND(100 * MAX 
+    (CASE WHEN demographic = 'unknown' THEN yearly_sales ELSE NULL END) / 
+      SUM(yearly_sales),2) AS unknown_percentage
+FROM demograpic_sales
+GROUP BY 1
+ORDER BY 1;
+
 
