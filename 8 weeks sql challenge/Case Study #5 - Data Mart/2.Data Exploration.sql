@@ -82,3 +82,12 @@ GROUP BY 1
 ORDER BY 1;
 
 
+--Which age_band and demographic values contribute the most to Retail sales?
+SELECT age_band,
+    demographic,
+   	Sum(sales) sum_sales,
+    Round(100 * SUM(sales)::NUMERIC / sum(sum(sales)) over(),2) as contribution_percentage
+    from clean_weekly_sales
+    where platform = 'Retail'
+    Group by 1,2
+    order by 3 desc

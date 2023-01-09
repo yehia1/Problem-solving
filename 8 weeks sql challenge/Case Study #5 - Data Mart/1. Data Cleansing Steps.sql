@@ -13,7 +13,7 @@ SELECT
 case 
   	when right(segment,1) = '1' then 'Young Adults'
   	when right(segment,1) = '2' then 'Middle Aged'
-  	when right(segment,1) in ('3','4') then 'Middle Aged'
+  	when right(segment,1) in ('3','4') then 'Retired'
   	else 'unknown'
   	end as age_band,
 case
