@@ -9,3 +9,10 @@ from
 (Select user_id,count(cookie_id) as counts
 from users
 group by 1) sub1
+
+
+--What is the unique number of visits by all users per month?
+Select extract(month from event_time) months,
+	count(distinct visit_id) Number_of_events
+    from events e
+    group by 1 
