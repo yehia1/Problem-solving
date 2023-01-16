@@ -16,3 +16,12 @@ Select extract(month from event_time) months,
 	count(distinct visit_id) Number_of_events
     from events e
     group by 1 
+
+--What is the percentage of visits which have a purchase event?
+Select
+	Round(100 * count(visit_id)::Numeric/
+    (select count(visit_id) from events),2) as Purchase_percentage
+from events e
+inner join event_identifier ei
+on e.event_type = ei.event_type
+where event_name = 'Purchase' 
