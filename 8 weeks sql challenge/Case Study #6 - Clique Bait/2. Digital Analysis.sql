@@ -25,3 +25,42 @@ from events e
 inner join event_identifier ei
 on e.event_type = ei.event_type
 where event_name = 'Purchase' 
+
+-- What is the percentage of visits which view the checkout page but do not have a purchase event?
+with Events_counter as(
+Select distinct visit_id,event_name,
+LEAD(event_name, 1) OVER(PARTITION BY visit_id ORDER BY event_name) as next_event
+FROM events e
+join event_identifier ei 
+on e.event_type = ei.event_type
+where e.event_type in (2,3)
+order by 1,2)
+
+Select 
+	Round(100 * Count(event_name) :: Numeric/
+          (Select count(event_name)FROM Events_counter),2)
+          AS No_Purchase_Checkout_Percentage
+from Events_counter
+where event_name = 'Add to Cart'
+and next_event is null
+
+
+--What are the top 3 pages by number of views?
+Select page_name ,count(visit_id) as number_of_views
+from events e
+inner join page_hierarchy p
+on e.page_id = p.page_id
+group by page_name
+order by number_of_views desc
+limit 3;
+
+--What is the number of views and cart adds for each product category?
+Select product_category,
+ sum(case when event_type = 1 then 1 end)as view_numbers,
+ sum(case when event_type = 2 then 1 end)as add_to_cart_numbers
+from events e
+inner join Page_Hierarchy p
+on e.page_id = p.page_id
+where product_category is not null
+group by product_category
+
