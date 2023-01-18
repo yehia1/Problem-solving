@@ -64,3 +64,27 @@ on e.page_id = p.page_id
 where product_category is not null
 group by product_category
 
+--What are the top 3 products by purchases?
+SELECT page_name,number_of_purchases
+FROM
+(SELECT
+      page_name,
+      event_name,
+      COUNT(event_name) AS number_of_purchases
+    FROM
+      events AS e
+      JOIN page_hierarchy AS pe ON e.page_id = pe.page_id
+      JOIN event_identifier AS ei ON e.event_type = ei.event_type
+    WHERE
+      visit_id in (
+        SELECT
+          distinct visit_id
+        FROM
+          events AS ee
+        WHERE
+          event_type = 3) 
+      AND product_id > 0
+      AND event_name = 'Add to Cart'
+    GROUP BY 1, 2) sub1
+order by 2 desc
+limit 3
