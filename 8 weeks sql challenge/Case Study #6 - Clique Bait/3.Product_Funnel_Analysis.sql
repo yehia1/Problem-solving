@@ -1,7 +1,7 @@
 Set search_path = clique_bait;
 
 -- create table which further aggregates the data for each product.
-Select page_name,
+Select page_name as product,
 sum(case 
 	when event_type = 1 then 1 end)as views,
 sum(case 
