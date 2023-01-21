@@ -59,4 +59,24 @@ on e.page_id = p.page_id
 where product_category is not null
 group by product_category;
 
-Select * from Category_aggregations
+-- making new table helps me in my queries
+Select *,rank() over(order by views desc)views_rank,
+rank() over(order by added_to_cart desc)added_to_cart_rank,
+rank() over(order by purchases desc)purchases_rank,
+rank() over(order by abandoned desc)abandoned_rank
+into ranked
+from Products_aggregations;
+
+--Which product was most likely to be abandoned?
+Select product,abandoned 
+from ranked
+where abandoned_rank = 1;
+
+-- Which product had the most views, cart adds and purchases?
+Select product,views,added_to_cart,purchases
+from ranked 
+where added_to_cart_rank = 1
+or views_rank = 1
+or purchases_rank =1 
+
+--Which product had the highest view to purchase percentage?
