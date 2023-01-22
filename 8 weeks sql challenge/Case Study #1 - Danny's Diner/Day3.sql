@@ -33,17 +33,3 @@ inner join menu m
 on m.product_id = s.product_id
 where order_date >= join_date) as sub
 where rank = 1
-
--- Which product had the most views, cart adds and purchases?
-with ranked as(
-Select *,rank() over(order by views desc)views_rank,
-rank() over(order by added_to_cart desc)added_to_cart_rank,
-rank() over(order by purchases desc)purchases_rank,
-rank() over(order by abandoned desc)abandoned_rank
-from Products_aggregations)
-
-Select product,views,added_to_cart,purchases
-from ranked 
-where added_to_cart_rank = 1
-or views_rank = 1
-or purchases_rank =1 

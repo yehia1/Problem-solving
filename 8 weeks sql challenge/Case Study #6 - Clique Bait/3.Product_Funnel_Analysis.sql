@@ -80,3 +80,16 @@ or views_rank = 1
 or purchases_rank =1 
 
 --Which product had the highest view to purchase percentage?
+Select product, Round(100 *purchases :: Numeric / views,2)
+from Products_aggregations
+order by 2 desc
+limit 1;
+
+--What is the average conversion rate from view to cart add?
+Select Round(avg(100 *added_to_cart :: Numeric / views),2) average_add_to_cart_percentage
+from Products_aggregations;
+
+--What is the average conversion rate from cart add to purchase?
+Select Round(avg(100 *purchases :: Numeric / added_to_cart),2) average_Purchase_percentage
+from Products_aggregations
+
