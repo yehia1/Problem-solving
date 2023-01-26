@@ -23,3 +23,36 @@ select
              percentile_cont(0.75) within group (order by revenue) as p_75
       from revenue
       
+--What is the average discount value per transaction?
+with transcation_discount as(
+Select distinct txn_id,
+	sum(discount :: Numeric / 100 * price * qty) discounts
+    from sales s
+    group by txn_id)
+    
+SELECT Round(avg(discounts),2) as average_disconts FROM transcation_discount;
+
+--What is the percentage split of all transactions for members vs non-members?
+with members as(
+Select Round(100 *count(member):: Numeric
+/(Select count(txn_id) from sales)) as members_percentage from sales
+where member = 't'),
+
+non_members as(
+Select Round(100 *count(member):: Numeric
+/(Select count(txn_id) from sales)) as non_members_percentage from sales
+where member = 'f')  
+
+
+select members_percentage,non_members_percentage
+from members,non_members;
+
+--What is the average revenue for member transactions and non-member transactions?
+
+Select (Select avg(price * qty)from sales where member = 't')
+avg_members_revenue,
+		(Select avg(price * qty)from sales where member = 'f' )
+avg_non_members_revenue
+from sales
+limit 1
+	
