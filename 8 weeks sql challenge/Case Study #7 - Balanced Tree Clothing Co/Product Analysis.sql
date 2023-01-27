@@ -1,10 +1,11 @@
 set search_path = balanced_tree;
 
 --What are the top 3 products by total revenue before discount?
-Select distinct product_name,s.price * qty as revenue 
+Select distinct product_name,sum(s.price * qty) as revenue 
 from sales s
 inner join product_details pd
 on pd.product_id = s.prod_id
+group by product_name
 order by 2 desc
 limit 3;
 
