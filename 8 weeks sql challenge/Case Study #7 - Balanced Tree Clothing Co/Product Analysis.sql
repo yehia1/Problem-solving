@@ -21,8 +21,8 @@ group by segment_name;
 --What is the top selling product for each segment?
 with segment_product_revenue as (
 Select segment_name,product_name,
-	round(sum(s.price * qty *(s.price * (discount :: Numeric/100))))revenue,
-	rank() over(partition by segment_name order by round(sum(s.price * qty *(s.price * (discount :: Numeric/100)))) desc) as rank
+	round(sum(qty *(s.price - (s.price * (discount :: Numeric/100)))))revenue,
+	rank() over(partition by segment_name order by round(sum(qty *(s.price - (s.price * (discount :: Numeric/100))))) desc) as rank
 from sales s
 inner join product_details pd
 on pd.product_id = s.prod_id
@@ -31,6 +31,30 @@ group by segment_name,product_name)
 Select segment_name,product_name,revenue
 from segment_product_revenue
 where rank = 1
+
+--What is the total quantity, revenue and discount for each category?
+Select category_name ,count(prod_id) as total_quantity,
+	round(sum(qty *(s.price - (s.price * (discount :: Numeric/100)))))revenue,
+    sum(qty * s.price * (discount :: Numeric/100)) as discount
+from sales s
+inner join product_details pd
+on pd.product_id = s.prod_id
+group by category_name;
+
+-- What is the top selling product for each category?
+with category_revenue as (
+Select category_name,product_name,
+	round(sum(qty *(s.price - (s.price * (discount :: Numeric/100)))))revenue,
+	rank() over(partition by category_name order by round(sum(qty *(s.price - (s.price * (discount :: Numeric/100))))) desc) as rank
+from sales s
+inner join product_details pd
+on pd.product_id = s.prod_id
+group by category_name,product_name)
+
+Select category_name,product_name,revenue 
+from category_revenue
+where rank = 1
+
 
 
             
