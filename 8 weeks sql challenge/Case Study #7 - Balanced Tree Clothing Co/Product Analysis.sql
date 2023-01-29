@@ -55,6 +55,48 @@ Select category_name,product_name,revenue
 from category_revenue
 where rank = 1
 
+--What is the percentage split of revenue by product for each segment?
+with segment_product_revenue as (
+Select segment_name,product_name,
+	round(sum(qty *(s.price - (s.price * (discount :: Numeric/100)))))revenue
+from sales s
+inner join product_details pd
+on pd.product_id = s.prod_id
+group by segment_name,product_name)
+
+Select segment_name,product_name,
+	Round(100 * revenue :: Numeric / sum(revenue) over (partition by segment_name)) as segment_percentage
+from segment_product_revenue
+order by 1 , 3 desc;
+    
+-- What is the percentage split of revenue by segment for each category?
+with Category_segment_revenue as (
+Select Category_name,segment_name,
+	round(sum(qty *(s.price - (s.price * (discount :: Numeric/100)))))revenue
+from sales s
+inner join product_details pd
+on pd.product_id = s.prod_id
+group by segment_name,Category_name)
+
+Select Category_name,segment_name,
+	Round(100 * revenue :: Numeric / sum(revenue) over (partition by Category_name)) as category_percentage
+from Category_segment_revenue
+order by 1 , 3 desc; 
+
+-- What is the percentage split of total revenue by category?
+with category_revenue as 
+(Select Category_name,
+	round(sum(qty *(s.price - (s.price * (discount :: Numeric/100)))))revenue
+from sales s
+inner join product_details pd
+on pd.product_id = s.prod_id
+group by Category_name)
+
+Select category_name,
+	Round(100 * revenue / (Select sum(revenue) from category_revenue),2)
+from category_revenue
+
+
 
 
             
