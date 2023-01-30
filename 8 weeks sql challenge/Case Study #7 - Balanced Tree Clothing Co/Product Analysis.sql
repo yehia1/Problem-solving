@@ -97,6 +97,47 @@ Select category_name,
 from category_revenue
 
 
+set search_path = balanced_tree;
+
+--What is the total transaction “penetration” for each product? (hint: penetration = number of transactions where at least 1 quantity of a product was purchased divided by total number of transactions)
+SELECT
+  product_name,
+  ROUND(
+    (100 * COUNT(product_name) :: numeric / (Select
+    count(distinct txn_id) from sales)),
+    2
+  ) as percent_of_penetration
+from sales s
+inner join product_details p
+on s.prod_id = p.product_id
+group by product_name
+order by 2 desc;
+
+--What is the most common combination of at least 1 quantity of any 3 products in a 1 single transaction?
+with products as(
+Select product_name ,txn_id
+from sales s
+inner join product_details p
+on s.prod_id = p.product_id)
+
+Select p1.product_name as product1,
+p2.product_name as product2,
+p3.product_name as product3,
+COUNT(*) AS times_bought_together
+from products p1
+join products p2 
+on p1.txn_id = p2.txn_id
+and p1.product_name != p2.product_name
+AND p1.product_name < p2.product_name
+join products p3 
+on p1.txn_id = p3.txn_id
+and p3.product_name != p2.product_name
+and p3.product_name != p2.product_name
+AND p1.product_name < p3.product_name
+AND p2.product_name < p3.product_name
+group by 1,2,3
+order by 4 desc 
+limit 1
 
 
             
