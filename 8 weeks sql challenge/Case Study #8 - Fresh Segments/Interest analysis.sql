@@ -37,3 +37,14 @@ select total_months,max(rank) as number_of_interests,round(100 * sum(max(rank)) 
 from counted_months
 group by total_months
 order by 3 desc
+
+--If we were to remove all interest_id values which are lower than the total_months value we found in the previous question - how many total data points would we be removing?
+with counted_months as(
+Select interest_id,count(interest_id) as total_months
+from interest_metrics
+group by interest_id 
+)
+
+Select count(total_months)
+from counted_months
+where total_months < 6
