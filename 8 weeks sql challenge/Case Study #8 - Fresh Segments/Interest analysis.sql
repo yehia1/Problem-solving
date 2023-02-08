@@ -48,3 +48,25 @@ group by interest_id
 Select count(total_months)
 from counted_months
 where total_months < 6
+
+
+--After removing these interests - how many unique interests are there for each month?
+Select month_year, Count(interest_id) As number_of_interests
+From
+  interest_metrics As im
+Where
+  month_year Is Not Null
+  And interest_id :: int In (
+    Select
+      interest_id :: int
+    From
+      interest_metrics
+    Group By
+      1
+    Having
+      Count(interest_id) > 5
+  )
+Group By
+  1
+Order By
+  1
