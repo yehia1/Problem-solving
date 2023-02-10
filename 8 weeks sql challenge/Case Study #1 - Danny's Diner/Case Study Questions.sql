@@ -115,3 +115,76 @@ SELECT s.customer_id,
     order by products_counts desc) as sub
     where rank = 1
     order by customer_id;
+
+--6. Which item was purchased first by the customer after they became a member?
+with members_orders as (
+Select s.customer_id,product_name,
+row_number() over(
+  partition by s.customer_id
+  order by order_date) as rank
+From sales s
+Inner Join menu u
+On s.product_id = u.product_id
+Inner Join members m
+On s.customer_id = m.customer_id
+Where order_date > join_date)
+
+Select customer_id,product_name
+From members_orders
+Where rank = 1
+
+--7. Which item was purchased just before the customer became a member?
+with members_orders as (
+Select s.customer_id,product_name,order_date,join_date,
+row_number() over(
+  partition by s.customer_id
+  order by order_date desc) as rank
+From sales s
+Inner Join menu u
+On s.product_id = u.product_id
+Inner Join members m
+On s.customer_id = m.customer_id
+Where order_date < join_date)
+
+Select customer_id,product_name,order_date,join_date
+From members_orders
+Where rank = 1;
+
+--8. What is the total items and amount spent for each member before they became a member?
+Select s.customer_id,count(s.product_id), sum(price)
+From sales s
+Inner Join menu u
+On s.product_id = u.product_id
+Inner join members m 
+On s.customer_id = m.customer_id
+Where order_date < join_date
+Group by s.customer_id
+
+--9. If each $1 spent equates to 10 points and sushi has a 2x points multiplier - how many points would each customer have?
+Select customer_id,sum(price),
+		sum(case 
+      		when product_name = 'sushi' then price * 20
+      		else price * 10
+      		end)
+      	as points
+From sales s
+Inner Join menu m
+On s.product_id = m.product_id
+Group by customer_id
+
+--10 In the first week after a customer joins the program (including their join date) they earn 2x points on all items,
+-- not just sushi - how many points do customer A and B have at the end of January?
+Select s.customer_id,sum(price) price_spent,
+		sum(case 
+            when order_date >= join_date then price * 20
+      		when product_name = 'sushi' then price * 20
+      		else price * 10
+      		end)
+      	as points
+From sales s
+Inner Join menu u
+On s.product_id = u.product_id
+Inner Join members m
+On m.customer_id = s.customer_id
+Where extract(month from order_date) < 2
+Group by s.customer_id
