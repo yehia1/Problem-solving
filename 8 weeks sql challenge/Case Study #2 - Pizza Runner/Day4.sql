@@ -87,7 +87,7 @@ Select order_id,
 Select order_id,
            concat(pizza_name,': ',string_agg(case
            	when counts > 1 
-      		then '2x' || topping_name 
+      		then '2x' , topping_name 
       		else topping_name end,',')) as toppings FROM
 (Select order_id,pizza_name,topping_name,count(topping_name) as counts
 	from pizza_toppings t,cleaned_customer c 
