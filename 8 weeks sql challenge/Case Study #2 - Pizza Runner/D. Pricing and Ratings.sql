@@ -78,7 +78,6 @@ On c.order_id = r.order_id
 Group By 1,2,3,4,5,6,8;
 
 -- If a Meat Lovers pizza was $12 and Vegetarian $10 fixed prices with no cost for extras and each runner is paid $0.30 per kilometre traveled - how much money does Pizza Runner have left over after these deliveries?
---E. Bonus Questions
 WITH profit AS (
   SELECT
     pizza_name,
