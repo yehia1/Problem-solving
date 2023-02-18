@@ -112,3 +112,42 @@ Select order_id,
 From toppings_counts_cte
 Group By order_id,pizza_name 
 
+-- What is the total quantity of each ingredient used in all delivered pizzas sorted by most frequent first?
+With pizza_ingredints as(
+Select order_id,
+    Case
+    When exclusions Is Not null And t.topping_id IN
+    	(Select 
+    	UNNEST(STRING_TO_ARRAY(exclusions, ',') :: int [])
+    	)
+    Then topping_name
+    End As exclusions,
+    Case
+    When extras Is Not null And t.topping_id IN
+    	(Select 
+    	UNNEST(STRING_TO_ARRAY(extras, ',') :: int [])
+    	)
+    Then topping_name
+    End As extras,
+    Case
+		When topping_id In
+    	(Select 
+    	UNNEST(STRING_TO_ARRAY(toppings, ',') :: int [])
+    	)
+        Then topping_name 
+        Else null End As toppings
+From pizza_toppings as t,
+cleaned_customer as c
+JOIN pizza_names as n 
+ON c.pizza_id = n.pizza_id
+Join pizza_recipes r 
+On r.pizza_id = c.pizza_id
+Order By order_id)
+
+Select order_id,(Count(extras) + Count(toppings) - Count(exclusions) 
+ ) as toppings_count
+From pizza_ingredints
+Group By order_id
+Order By toppings_count desc
+           
+
