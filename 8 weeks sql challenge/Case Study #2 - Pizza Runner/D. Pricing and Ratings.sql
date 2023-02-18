@@ -113,3 +113,4 @@ FROM
   profit,
   expenses
 Group By expense;
+
