@@ -16,9 +16,9 @@ class Solution:
             Flag = '0'
             while(stack and j < stack[-1][1]):
                 Flag = '1'
-                temp = (i - stack[-1][0]) * stack[-1][1]
-                result = max(result,temp)
                 index, value = stack.pop()
+                temp = (i - index) * value
+                result = max(result,temp)
 
 
             if (Flag != '0'):
