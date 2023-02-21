@@ -35,3 +35,19 @@ class Solution:
             
             
         return result
+
+# better binary search.
+class Solution:
+    def search(self, nums: List[int], target: int) -> int:
+        left,right = 0 ,len(nums)
+        result = -1
+        while(left < right):
+            mid = (left + right) // 2
+            if(target > nums[mid]):
+                left = mid + 1
+            elif(target < nums[mid]) :
+                right = mid
+            elif(target == nums[mid]):
+                return mid
+            if(left == right):
+                return result
