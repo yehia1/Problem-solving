@@ -1,4 +1,4 @@
-# 🥑 Case Study #2: Pizza Runner
+# 🥑 Case Study #2: - Foodie-Fi
 
 ## A. Customer Journey
 | customer_id | plan_name     | start_date               |
