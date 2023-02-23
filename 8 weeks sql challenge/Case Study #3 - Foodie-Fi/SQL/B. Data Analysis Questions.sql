@@ -57,6 +57,8 @@ On t.customer_id = c.customer_id
 Where DATE_PART('day',c.start_date :: timestamp - t.start_date :: timestamp) = 7;
 
 -- What is the number and percentage of customer plans after their initial free trial?
+SET search_path = foodie_fi;
+
 With next_plan as(
 SELECT 
   customer_id, 
@@ -71,9 +73,9 @@ Select next_plan,
 	Count(next_plan) as total_transcations,
 	Concat(
       Round(100 * Count(next_plan) :: Numeric /
-            (Select count(customer_id) From next_plan Where next_plan is not Null),1),'%') as plans_percentage
+            (Select count(distinct customer_id) From subscriptions),1),'%') as plans_percentage
 From next_plan
-Where next_plan is not null
+Where next_plan is not null And plan_id = 0
 Group by next_plan
 Order by next_plan
 
