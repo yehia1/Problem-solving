@@ -1,4 +1,4 @@
-# 🥑 Case Study #2: - Foodie-Fi
+# 🥑 Case Study #2: Pizza Runner
 
 ## A. Customer Journey
 | customer_id | plan_name     | start_date               |
@@ -294,3 +294,98 @@ Where next_plan = 1 And plan_id = 2
 | -------------------- |
 | 0                    |
 *** 
+## C. Challenge Payment Question
+The real solution is still under progress this solution is temorary and isn't tottaly right 
+```
+Select customer_id,s.plan_id,plan_name,
+	start_date as payment_date,price as amount,
+    rank() over(partition by customer_id
+               order by s.plan_id) as payment_order
+From plans p 
+Inner Join subscriptions s
+On s.plan_id = p.plan_id
+Where s.plan_id != 0 And s.plan_id !=4
+And start_date Between '2020-01-01' And '2020-12-31'
+```
+| customer_id | plan_id | plan_name     | payment_date             | amount | payment_order |
+| ----------- | ------- | ------------- | ------------------------ | ------ | ------------- |
+| 1           | 1       | basic monthly | 2020-08-08T00:00:00.000Z | 9.90   | 1             |
+| 2           | 3       | pro annual    | 2020-09-27T00:00:00.000Z | 199.00 | 1             |
+| 3           | 1       | basic monthly | 2020-01-20T00:00:00.000Z | 9.90   | 1             |
+| 4           | 1       | basic monthly | 2020-01-24T00:00:00.000Z | 9.90   | 1             |
+| 5           | 1       | basic monthly | 2020-08-10T00:00:00.000Z | 9.90   | 1             |
+| 6           | 1       | basic monthly | 2020-12-30T00:00:00.000Z | 9.90   | 1             |
+| 7           | 1       | basic monthly | 2020-02-12T00:00:00.000Z | 9.90   | 1             |
+| 7           | 2       | pro monthly   | 2020-05-22T00:00:00.000Z | 19.90  | 2             |
+| 8           | 1       | basic monthly | 2020-06-18T00:00:00.000Z | 9.90   | 1             |
+| 8           | 2       | pro monthly   | 2020-08-03T00:00:00.000Z | 19.90  | 2             |
+***
+## D. Outside The Box Questions
+
+### How would you calculate the rate of growth for Foodie-Fi?
+```
+Set
+  search_path = foodie_fi;
+Select
+  DATE_TRUNC('month', start_date) AS month,
+  Count(customer_id) as current_number_of_customers,
+  Lag(Count(customer_id), 1) over (
+    ORDER BY
+      DATE_TRUNC('month', start_date)
+  ) as past_number_of_customers,
+  (
+    100 * (
+      Count(customer_id) - Lag(Count(customer_id), 1) over (
+        Order By
+          DATE_TRUNC('month', start_date)
+      )
+    ) / Lag(Count(customer_id), 1) over (
+      Order By
+        DATE_TRUNC('month', start_date)
+    )
+  ) || '%' AS growth
+From
+  subscriptions as s
+  Join plans as p
+  On s.plan_id = p.plan_id
+Where
+  plan_name != 'trial'
+  and plan_name != 'churn'
+Group By
+  month
+Order By
+  month
+```
+| month                    | current_number_of_customers | past_number_of_customers | growth |
+| ------------------------ | --------------------------- | ------------------------ | ------ |
+| 2020-01-01T00:00:00.000Z | 62                          |                          |        |
+| 2020-02-01T00:00:00.000Z | 71                          | 62                       | 14%    |
+| 2020-03-01T00:00:00.000Z | 93                          | 71                       | 30%    |
+| 2020-04-01T00:00:00.000Z | 85                          | 93                       | -8%    |
+| 2020-05-01T00:00:00.000Z | 105                         | 85                       | 23%    |
+| 2020-06-01T00:00:00.000Z | 106                         | 105                      | 0%     |
+| 2020-07-01T00:00:00.000Z | 104                         | 106                      | -1%    |
+| 2020-08-01T00:00:00.000Z | 134                         | 104                      | 28%    |
+| 2020-09-01T00:00:00.000Z | 115                         | 134                      | -14%   |
+| 2020-10-01T00:00:00.000Z | 125                         | 115                      | 8%     |
+| 2020-11-01T00:00:00.000Z | 101                         | 125                      | -19%   |
+| 2020-12-01T00:00:00.000Z | 111                         | 101                      | 9%     |
+| 2021-01-01T00:00:00.000Z | 58                          | 111                      | -47%   |
+| 2021-02-01T00:00:00.000Z | 29                          | 58                       | -50%   |
+| 2021-03-01T00:00:00.000Z | 24                          | 29                       | -17%   |
+| 2021-04-01T00:00:00.000Z | 20                          | 24                       | -16%   |
+### What key metrics would you recommend Foodie-Fi management to track over time to assess performance of their overall business?
+The most important of all keys is the number of customers who churned after they subscribed for any plan to keep track of them and decrease the percentage.
+
+### What are some key customer journeys or experiences that you would analyse further to improve customer retention?
+We must keep it with the customer after the trial the first 7 days and get reviews and see the total install/uninstall of the app.
+
+### If the Foodie-Fi team were to create an exit survey shown to customers who wish to cancel their subscription, what questions would you include in the survey?
+- Why you want to uninstall ?
+- If something went wrong during using app please tell us 
+- If we didn't satisfy what you want can you please reccomend us the feature you want to implment
+- Is uninstalling app is your final decision
+### What business levers could the Foodie-Fi team use to reduce the customer churn rate? How would you validate the effectiveness of your ideas?
+- make offers like seasonal ones
+- keep it up with loyal customers and check thier opinion frequently
+- make updates and take customers opinons out of it.
