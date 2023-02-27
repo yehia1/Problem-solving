@@ -96,10 +96,10 @@ On s.month = m.month
 
 -- What is the percentage of sales by demographic for each year in the dataset?
 With demograpic_sales as (
-Select year,demographic,sum(sales) yearly_sales
-from clean_weekly_sales
+Select year,demographic,Sum(sales) yearly_sales
+From clean_weekly_sales
 Group By year,demographic
-order By year,demographic)
+Order By year,demographic)
 
 Select year, 
   ROUND(100 * MAX 
@@ -112,25 +112,25 @@ Select year,
     (CASE WHEN demographic = 'unknown' THEN yearly_sales ELSE NULL END) / 
       SUM(yearly_sales),2) AS unknown_percentage
 FROM demograpic_sales
-GROUP BY 1
-ORDER BY 1;
+GROUP BY year
+ORDER BY year;
 
 
 --Which age_band and demographic values contribute the most to Retail sales?
 SELECT age_band,
     demographic,
    	Sum(sales) sum_sales,
-    Round(100 * SUM(sales)::NUMERIC / sum(sum(sales)) over(),2) as contribution_percentage
-    from clean_weekly_sales
-    where platform = 'Retail'
-    Group by 1,2
-    order by 3 desc
+    Round(100 * SUM(sales)::NUMERIC / Sum(Sum(sales)) Over(),2) as contribution_percentage
+From clean_weekly_sales
+Where platform = 'Retail'
+Group By 1,2
+Order By 3 desc
 
 
 --Can we use the avg_transaction column to find the average transaction size for each year for Retail vs Shopify? If not - how would you calculate it instead?
 Select year,platform,
 	Round(avg(avg_transaction)) avg_transaction,
-    sum(sales)/sum(transactions) as avg_calculated_transcations
-    from clean_weekly_sales
-    group by 1,2
-    order by 1,2
+  sum(sales)/sum(transactions) as avg_calculated_transcations
+From clean_weekly_sales
+Group By 1,2
+Order By 1,2
