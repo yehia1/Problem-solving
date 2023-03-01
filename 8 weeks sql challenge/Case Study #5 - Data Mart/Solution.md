@@ -285,3 +285,309 @@ Order By 1,2
 | 2020 | Retail   | 41              | 36                          |
 | 2020 | Shopify  | 175             | 179                         |
 ***
+## Before and After analysis
+This technique is usually used when we inspect an important event and want to inspect the impact before and after a certain point in time.
+
+Taking the `week_date` value of `2020-06-15` as the baseline week where the Data Mart sustainable packaging changes came into effect.
+
+We would include all `week_date` values for `2020-06-15` as the start of the period after the change and the previous week_date values would be before
+### What is the total sales for the 4 weeks before and after 2020-06-15? What is the growth or reduction rate in actual values and percentage of sales?
+```
+with base_week as(
+  Select week 
+  From clean_weekly_sales
+  Where date = '2020-6-15' Limit 1),
+
+Four_weeks_sales as(
+Select 
+	Sum(
+		Case
+			When week Between
+			(Select week From base_week) And
+			(Select week From base_week) + 3 
+			And year = 2020
+			Then sales End)as after_sales,
+    Sum(
+		Case
+    		When week Between
+      			(Select week From base_week) - 4 And
+                (Select week From base_week) - 1 
+    			And year = 2020
+                Then sales End)as before_sales
+   From clean_weekly_sales) 
+   
+Select after_sales,before_sales,
+	after_sales - before_sales as total_diff,
+    Round(100*(after_sales - before_sales) ::Numeric/ before_sales ,2) as sales_change_percent
+From Four_weeks_sales;
+```
+| after_sales | before_sales | total_diff | sales_change_percent |
+| ----------- | ------------ | ---------- | -------------------- |
+| 2318994169  | 2345878357   | -26884188  | -1.15                |
+### What about the entire 12 weeks before and after?
+```
+With base_week as(
+  Select week
+  From clean_weekly_sales
+  Where date = '2020-6-15' Limit 1),
+
+Twelve_weeks_sales as(
+	Select 
+		Sum(
+			Case
+				When week Between
+					(Select week From base_week) And
+					(Select week From base_week) + 11 
+					And year = 2020
+				Then sales End)as after_sales,
+    	Sum(
+			Case
+    			When week Between
+      				(Select week From base_week) - 12 And
+                	(Select week From base_week) - 1 
+    				And year = 2020
+                Then sales end)as before_sales
+    From clean_weekly_sales) 
+   
+Select after_sales,before_sales,
+	after_sales - before_sales as total_diff,
+    Round(100*(after_sales - before_sales) ::Numeric/ before_sales ,2) as sales_change_percent
+From Twelve_weeks_sales;
+```
+| after_sales | before_sales | total_diff | sales_change_percent |
+| ----------- | ------------ | ---------- | -------------------- |
+| 6973947753  | 7126273147   | -152325394 | -2.14                |
+### How do the sale metrics for these 2 periods before and after compare with the previous years in 2018 and 2019?
+taking the 12 as example for each year
+```
+With base_week as(
+  Select week 
+  From clean_weekly_sales
+  Where date = '2020-6-15' limit 1),
+
+Twelve_weeks_sales as(
+Select year,
+	Sum(
+		Case
+			When week Between
+				(Select week From base_week) And
+				(Select week From base_week) + 11 
+			Then sales End)as after_sales,
+    sum(
+		Case
+    		when week Between
+      			(Select week From base_week) - 12 And
+                (Select week From base_week) - 1 
+            Then sales End)as before_sales
+   From clean_weekly_sales
+   Group by 1) 
+   
+Select year,after_sales,before_sales,
+	after_sales - before_sales as total_diff,
+    Round(100*(after_sales - before_sales) ::Numeric/ before_sales ,2) as sales_change_percent
+From Twelve_weeks_sales
+Order By year
+```
+| year | after_sales | before_sales | total_diff | sales_change_percent |
+| ---- | ----------- | ------------ | ---------- | -------------------- |
+| 2018 | 6500818510  | 6396562317   | 104256193  | 1.63                 |
+| 2019 | 6862646103  | 6883386397   | -20740294  | -0.30                |
+| 2020 | 6973947753  | 7126273147   | -152325394 | -2.14                |
+From the result there is a decreasing in sales.
+***
+## Bonus Question
+Which areas of the business have the highest negative impact in sales metrics performance in 2020 for the 12 week before and after period?
+### region
+```
+With base_week as(
+  Select week 
+  From clean_weekly_sales
+  Where date = '2020-6-15' Limit 1),
+
+Twelve_weeks_sales as(
+	Select region,
+		Sum(
+          Case
+			When week Between
+			(Select week From base_week) And
+			(Select week From base_week) + 11
+    		And year = 2020   
+		  Then sales End)as after_sales,
+    	Sum(
+          Case
+    		When week Between
+      	    (Select week From base_week) - 12 And
+            (Select week From base_week) - 1 
+        	And year = 2020  
+          Then sales End)as before_sales
+    From clean_weekly_sales
+    Group by 1) 
+   
+Select region,after_sales,before_sales,
+	after_sales - before_sales as total_diff,
+    Round(100*(after_sales - before_sales) ::Numeric/ before_sales ,2) as sales_change_percent
+From Twelve_weeks_sales
+Order By region
+```
+| region        | after_sales | before_sales | total_diff | sales_change_percent |
+| ------------- | ----------- | ------------ | ---------- | -------------------- |
+| AFRICA        | 1700390294  | 1709537105   | -9146811   | -0.54                |
+| ASIA          | 1583807621  | 1637244466   | -53436845  | -3.26                |
+| CANADA        | 418264441   | 426438454    | -8174013   | -1.92                |
+| EUROPE        | 114038959   | 108886567    | 5152392    | 4.73                 |
+| OCEANIA       | 2282795690  | 2354116790   | -71321100  | -3.03                |
+| SOUTH AMERICA | 208452033   | 213036207    | -4584174   | -2.15                |
+| USA           | 666198715   | 677013558    | -10814843  | -1.60                |
+All the sales got negative percentage except for Europe
+### platform
+```
+With base_week as(
+  Select week 
+  From clean_weekly_sales
+  Where date = '2020-6-15' Limit 1),
+
+Twelve_weeks_sales as(
+	Select platform,
+		Sum(
+          Case
+			When week Between
+			(Select week From base_week) And
+			(Select week From base_week) + 11
+    		And year = 2020   
+		  Then sales End)as after_sales,
+    	Sum(
+          Case
+    	  	When week Between
+      	  	(Select week From base_week) - 12 And
+            (Select week From base_week) - 1 
+          	And year = 2020  
+          Then sales End)as before_sales
+   	From clean_weekly_sales
+   	Group By 1) 
+   
+Select platform,after_sales,before_sales,
+	after_sales - before_sales as total_diff,
+    Round(100*(after_sales - before_sales) ::Numeric/ before_sales ,2) as sales_change_percent
+From Twelve_weeks_sales
+Order By platform
+```
+| platform | after_sales | before_sales | total_diff | sales_change_percent |
+| -------- | ----------- | ------------ | ---------- | -------------------- |
+| Retail   | 6738777279  | 6906861113   | -168083834 | -2.43                |
+| Shopify  | 235170474   | 219412034    | 15758440   | 7.18                 |
+shopify got good sales increase percentage.
+### age_band
+```
+With base_week as(
+  Select week 
+  From clean_weekly_sales
+  Where date = '2020-6-15' Limit 1),
+
+Twelve_weeks_sales as(
+	Select age_band,
+		Sum(
+          Case
+			When week Between
+			(Select week From base_week) And
+			(Select week From base_week) + 11
+    		And year = 2020   
+		  Then sales End)as after_sales,
+    	Sum(
+          Case
+    	  	When week Between
+      	  	(Select week From base_week) - 12 And
+            (Select week From base_week) - 1 
+          	And year = 2020  
+          Then sales End)as before_sales
+   	From clean_weekly_sales
+   	Group By 1) 
+   
+Select age_band,after_sales,before_sales,
+	after_sales - before_sales as total_diff,
+    Round(100*(after_sales - before_sales) ::Numeric/ before_sales ,2) as sales_change_percent
+From Twelve_weeks_sales
+Order By age_band
+```
+| age_band     | after_sales | before_sales | total_diff | sales_change_percent |
+| ------------ | ----------- | ------------ | ---------- | -------------------- |
+| Middle Aged  | 1141853348  | 1164847640   | -22994292  | -1.97                |
+| Retired      | 2365714994  | 2395264515   | -29549521  | -1.23                |
+| Young Adults | 794417968   | 801806528    | -7388560   | -0.92                |
+| unknown      | 2671961443  | 2764354464   | -92393021  | -3.34                |
+all the metrices is bad here.
+### demographic
+```
+With base_week as(
+  Select week 
+  From clean_weekly_sales
+  Where date = '2020-6-15' Limit 1),
+
+Twelve_weeks_sales as(
+	Select demographic,
+		Sum(
+          Case
+			When week Between
+			(Select week From base_week) And
+			(Select week From base_week) + 11
+    		And year = 2020   
+		  Then sales End)as after_sales,
+    	Sum(
+          Case
+    	  	When week Between
+      	  	(Select week From base_week) - 12 And
+            (Select week From base_week) - 1 
+          	And year = 2020  
+          Then sales End)as before_sales
+   	From clean_weekly_sales
+   	Group By 1) 
+   
+Select demographic,after_sales,before_sales,
+	after_sales - before_sales as total_diff,
+    Round(100*(after_sales - before_sales) ::Numeric/ before_sales ,2) as sales_change_percent
+From Twelve_weeks_sales
+Order By demographic
+```
+| demographic | after_sales | before_sales | total_diff | sales_change_percent |
+| ----------- | ----------- | ------------ | ---------- | -------------------- |
+| Couples     | 2015977285  | 2033589643   | -17612358  | -0.87                |
+| Families    | 2286009025  | 2328329040   | -42320015  | -1.82                |
+| unknown     | 2671961443  | 2764354464   | -92393021  | -3.34                |
+all is negative again.
+### customer_type
+```
+With base_week as(
+  Select week 
+  From clean_weekly_sales
+  Where date = '2020-6-15' Limit 1),
+
+Twelve_weeks_sales as(
+	Select customer_type,
+		Sum(
+          Case
+			When week Between
+			(Select week From base_week) And
+			(Select week From base_week) + 11
+    		And year = 2020   
+		  Then sales End)as after_sales,
+    	Sum(
+          Case
+    	  	When week Between
+      	  	(Select week From base_week) - 12 And
+            (Select week From base_week) - 1 
+          	And year = 2020  
+          Then sales End)as before_sales
+   	From clean_weekly_sales
+   	Group By 1) 
+   
+Select customer_type,after_sales,before_sales,
+	after_sales - before_sales as total_diff,
+    Round(100*(after_sales - before_sales) ::Numeric/ before_sales ,2) as sales_change_percent
+From Twelve_weeks_sales
+Order By customer_type
+```
+| customer_type | after_sales | before_sales | total_diff | sales_change_percent |
+| ------------- | ----------- | ------------ | ---------- | -------------------- |
+| Existing      | 3606243454  | 3690116427   | -83872973  | -2.27                |
+| Guest         | 2496233635  | 2573436301   | -77202666  | -3.00                |
+| New           | 871470664   | 862720419    | 8750245    | 1.01                 |
+New customers gives a good sales percentage in 2020
