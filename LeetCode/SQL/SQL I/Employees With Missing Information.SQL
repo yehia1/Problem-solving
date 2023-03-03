@@ -12,7 +12,6 @@ insert into Salaries (employee_id, salary) values ('1', '22517')
 insert into Salaries (employee_id, salary) values ('4', '63539')
 
 # Write your MySQL query statement below
-
 Select e.employee_id
 From Employees e 
 Left JOIN Salaries s
