@@ -1,68 +1,75 @@
 SET search_PATH = clique_bait;
 
 --find number of users
-Select count(*) as number_of_users from usersك
+Select Count(distinct user_id) as number_of_users From users
 
 --How many cookies does each user have on average?
 Select Round(avg(counts)) as avg_cookies
 from
-(Select user_id,count(cookie_id) as counts
+(Select user_id,Count(cookie_id) as counts
 from users
-group by 1) sub1
+Group By 1) sub1
 
 
 --What is the unique number of visits by all users per month?
-Select extract(month from event_time) months,
-	count(distinct visit_id) Number_of_events
-    from events e
-    group by 1 
+Select Extract(Month From event_time) months,
+	Count(distinct visit_id) Number_of_events
+From events e
+Group By 1 
+
+-- What is the number of events for each event type?
+Select event_name,Count(e.*)
+From events e
+Inner Join event_identifier ei
+On ei.event_type = e.event_type
+Group By event_name;
 
 --What is the percentage of visits which have a purchase event?
 Select
 	Round(100 * count(visit_id)::Numeric/
-    (select count(visit_id) from events),2) as Purchase_percentage
-from events e
-inner join event_identifier ei
-on e.event_type = ei.event_type
-where event_name = 'Purchase' 
+    (Select count(visit_id) from events),2) as Purchase_percentage
+From events e
+Inner Join event_identifier ei
+On e.event_type = ei.event_type
+Where event_name = 'Purchase' 
 
 -- What is the percentage of visits which view the checkout page but do not have a purchase event?
-with Events_counter as(
-Select distinct visit_id,event_name,
+With Events_counter as(
+Select Distinct visit_id,event_name,
 LEAD(event_name, 1) OVER(PARTITION BY visit_id ORDER BY event_name) as next_event
 FROM events e
-join event_identifier ei 
-on e.event_type = ei.event_type
-where e.event_type in (2,3)
-order by 1,2)
+Join event_identifier ei 
+On e.event_type = ei.event_type
+Where e.event_type In (2,3)
+Order By 1,2)
 
 Select 
 	Round(100 * Count(event_name) :: Numeric/
           (Select count(event_name)FROM Events_counter),2)
           AS No_Purchase_Checkout_Percentage
-from Events_counter
-where event_name = 'Add to Cart'
-and next_event is null
+From Events_counter
+Where event_name = 'Add to Cart'
+And next_event Is null
 
 
 --What are the top 3 pages by number of views?
-Select page_name ,count(visit_id) as number_of_views
-from events e
-inner join page_hierarchy p
-on e.page_id = p.page_id
-group by page_name
-order by number_of_views desc
-limit 3;
+Select page_name ,Count(visit_id) as number_of_views
+From events e
+Inner Join page_hierarchy p
+On e.page_id = p.page_id
+Group By page_name
+Order By number_of_views desc
+Limit 3;
 
 --What is the number of views and cart adds for each product category?
 Select product_category,
- sum(case when event_type = 1 then 1 end)as view_numbers,
- sum(case when event_type = 2 then 1 end)as add_to_cart_numbers
-from events e
-inner join Page_Hierarchy p
-on e.page_id = p.page_id
-where product_category is not null
-group by product_category
+ Sum(Case When event_type = 1 Then 1 End)as view_numbers,
+ Sum(Case When event_type = 2 Then 1 End)as add_to_cart_numbers
+From events e
+Inner Join Page_Hierarchy p
+On e.page_id = p.page_id
+Where product_category Is Not null
+Group By product_category
 
 --What are the top 3 products by purchases?
 SELECT page_name,number_of_purchases
@@ -86,5 +93,5 @@ FROM
       AND product_id > 0
       AND event_name = 'Add to Cart'
     GROUP BY 1, 2) sub1
-order by 2 desc
-limit 3
+Order By 2 Desc
+Limit 3
