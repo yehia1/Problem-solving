@@ -1,4 +1,4 @@
-# Solution
+# 🛍️ Case Study #5 - Data Mart
 ## 1. Data Cleansing Steps
 ### Convert the week_date to a DATE format
 ```
