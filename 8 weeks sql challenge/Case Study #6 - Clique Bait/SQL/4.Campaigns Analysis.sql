@@ -16,7 +16,7 @@ Inner join users u
 On u.cookie_id = e.cookie_id
 LEFT JOIN campaign_identifier AS c
 ON e.event_time BETWEEN c.start_date AND c.end_date
-LEFT JOIN age_hierarchy AS p
+LEFT JOIN page_hierarchy AS p
   ON e.page_id = p.page_id
 Group By 1,2,campaign_name
 Order By 1

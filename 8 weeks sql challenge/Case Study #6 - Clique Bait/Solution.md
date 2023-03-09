@@ -340,3 +340,43 @@ From Products_aggregations
 | average_purchase_percentage |
 | --------------------------- |
 | 75.93                       |
+## 4.Campaigns Analysis
+Generate a table that has 1 single row for every unique visit_id record and has the following columns:
+- `user_id`
+- `visit_id`
+- `visit_start_time` the earliest `event_time` for each visit
+- `page_views`: count of page views for each visit
+- `cart_adds`: count of product cart add events for each visit
+- `purchase`: 1/0 flag if a purchase event exists for each visit
+- `campaign_name`: map the visit to a campaign if the `visit_start_time` falls between the `start_date` and `end_date`
+- `impression`: count of ad impressions for each visit
+- `click`: count of ad clicks for each visit
+- (Optional column) `cart_products`: a comma separated text value with products added to the cart sorted by the order they were added to the cart (hint: use the `sequence_number`)
+```
+Select u.user_id,e.visit_id,
+  Min(e.event_time) as visit_start_time,
+  Sum(Case When e.event_type = 1 Then 1 End) as page_views,
+  Sum(Case When e.event_type = 2 Then 1 Else 0 End) as cart_adds,
+  Sum(Case When e.event_type = 3 Then 1 Else 0 End) as purchases,
+  c.campaign_name,
+  Sum(Case When e.event_type = 4 Then 1 Else 0 End) as impression,
+  Sum(Case When e.event_type = 5 then 1 Else 0 End) as click,
+  STRING_AGG(CASE WHEN p.product_id IS NOT NULL AND e.event_type = 2 THEN p.page_name ELSE NULL END, 
+      ', ' ORDER BY e.sequence_number) AS cart_products
+From events e 
+Inner join users u
+On u.cookie_id = e.cookie_id
+LEFT JOIN campaign_identifier AS c
+ON e.event_time BETWEEN c.start_date AND c.end_date
+LEFT JOIN page_hierarchy AS p
+  ON e.page_id = p.page_id
+Group By 1,2,campaign_name
+Order By 1
+```
+| user_id | visit_id | visit_start_time         | page_views | cart_adds | purchases | campaign_name                     | impression | click | cart_products                                                  |
+| ------- | -------- | ------------------------ | ---------- | --------- | --------- | --------------------------------- | ---------- | ----- | -------------------------------------------------------------- |
+| 1       | 02a5d5   | 2020-02-26T16:57:26.260Z | 4          | 0         | 0         | Half Off - Treat Your Shellf(ish) | 0          | 0     |                                                                |
+| 1       | 0826dc   | 2020-02-26T05:58:37.918Z | 1          | 0         | 0         | Half Off - Treat Your Shellf(ish) | 0          | 0     |                                                                |
+| 1       | 0fc437   | 2020-02-04T17:49:49.602Z | 10         | 6         | 1         | Half Off - Treat Your Shellf(ish) | 1          | 1     | Tuna, Russian Caviar, Black Truffle, Abalone, Crab, Oyster     |
+| 1       | 30b94d   | 2020-03-15T13:12:54.023Z | 9          | 7         | 1         | Half Off - Treat Your Shellf(ish) | 1          | 1     | Salmon, Kingfish, Tuna, Russian Caviar, Abalone, Lobster, Crab |
+| 1       | 41355d   | 2020-03-25T00:11:17.860Z | 6          | 1         | 0         | Half Off - Treat Your Shellf(ish) | 0          | 0     | Lobster                                                        |
