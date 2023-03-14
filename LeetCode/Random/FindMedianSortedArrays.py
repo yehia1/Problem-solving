@@ -7,3 +7,4 @@ class Solution:
             return (nums3[length//2]+nums3[length//2+1])/2
         else :
             return nums3[length // 2]
+        
