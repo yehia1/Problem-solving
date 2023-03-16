@@ -33,7 +33,8 @@ Select im.*,im1.interest_name,
 From interest_metrics im
 Inner Join interest_map im1
 On im1.id = im.interest_id :: Numeric
-Where interest_id = '21246';
+Where interest_id = '21246'
+Order By im.month_year Nulls First;
 
 --Are there any records in your joined table where the month_year value is before the created_at value from the fresh_segments.interest_map table?
 -- Do you think these values are valid and why?

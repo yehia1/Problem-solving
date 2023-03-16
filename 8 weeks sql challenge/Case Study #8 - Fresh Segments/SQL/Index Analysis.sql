@@ -15,7 +15,7 @@ UPDATE interest_metrics SET Average_composition = composition / index_value ;
 With ranked_month_compostion as(
 Select month_year,interest_name,
 	rank() over(partition by month_year
-              order by Average_composition) as rank
+              order by Average_composition desc) as rank
 From interest_metrics im
 Inner Join interest_map im1
 On im.interest_id :: int = im1.id),
@@ -28,7 +28,7 @@ Where rank <= 10
 With ranked_month_compostion as(
 Select month_year,interest_name,
 	rank() over(partition by month_year
-              order by Average_composition) as rank
+              order by Average_composition desc) as rank
 From interest_metrics im
 Inner Join interest_map im1
 On im.interest_id :: int = im1.id),
@@ -58,4 +58,37 @@ From ranked_month_compostion
 Where rank <= 10
 Group By month_year
 
+-- What is the 3 month rolling average of the max average composition value from September 2018 to August 2019 and include the previous top ranking interests in the same output shown below.
+With ranked_month_compostion as(
+Select month_year,interest_name,Average_composition,
+	rank() over(partition by month_year
+              order by Average_composition desc) as rank
+From interest_metrics im
+Inner Join interest_map im1
+On im.interest_id :: int = im1.id),
 
+semi_final_sol as(
+Select month_year,interest_name,Average_composition as max_index_composition,
+(AVG(Average_composition) OVER(ORDER BY
+            month_year ROWS BETWEEN 2 PRECEDING
+            AND CURRENT ROW)
+      ) :: numeric(10, 2) AS _3_month_moving_avg,
+Concat(
+	Lag(interest_name,1) over(order by month_year),
+  	': ',
+  	Lag(Average_composition,1) over(order by month_year)
+) as _1_month_ago,
+Concat(
+	Lag(interest_name,2) over(order by month_year),
+  	': ',
+  	Lag(Average_composition,2) over(order by month_year)
+) as _2_month_ago
+From ranked_month_compostion
+Where rank = 1 
+Order by month_year)
+
+Select month_year,interest_name,max_index_composition,
+_3_month_moving_avg,_1_month_ago,_2_month_ago
+From semi_final_sol
+Where month_year > '2018-08-01'
+Order By month_year
