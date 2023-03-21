@@ -1,5 +1,5 @@
 # 8 Weeks SQL Challenge
-- [Introduction](Introduction)
+- [Introduction](#Introduction)
 - [Case Studies](#Case-studies)
 - [Skills Gained](#Skills-Gained)
 ***
