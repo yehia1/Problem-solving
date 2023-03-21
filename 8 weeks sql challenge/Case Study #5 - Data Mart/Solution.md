@@ -590,4 +590,5 @@ Order By customer_type
 | Existing      | 3606243454  | 3690116427   | -83872973  | -2.27                |
 | Guest         | 2496233635  | 2573436301   | -77202666  | -3.00                |
 | New           | 871470664   | 862720419    | 8750245    | 1.01                 |
+
 New customers gives a good sales percentage in 2020
