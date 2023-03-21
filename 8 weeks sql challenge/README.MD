@@ -1,7 +1,7 @@
 # 8 Weeks SQL Challenge
 - [Introduction](#Introduction)
 - [Case Studies](#Case-studies)
-- [Skills Gained](#Skills-Gained)
+- [Skills Gained](#skills-gained)
 ***
 ## Introduction 
 This Challenge is so good for getting in the next level in SQL That allows you to apply it in real test case studies and enhance you apility to generate SQL queries using different functions.
@@ -27,7 +27,7 @@ This Challenge is so good for getting in the next level in SQL That allows you t
 ## [Case Study #8 - Fresh Segments](https://8weeksqlchallenge.com/case-study-8/)
 <img src="https://8weeksqlchallenge.com/images/case-study-designs/8.png" alt="Image" width="500" height="520"></img> 
 ***
-## Skill Gained
+## Skills Gained
 - Using of `CTEs`
 - Rank(),Dense_rank(),Row_number() OVER(parition by 'column_name' order by 'column_name')
 - Advanced use of `case` function
