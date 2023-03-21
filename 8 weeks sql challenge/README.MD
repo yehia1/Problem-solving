@@ -4,7 +4,7 @@
 - [Skills Gained](#skills-gained)
 ***
 ## Introduction 
-This Challenge is so good for getting in the next level in SQL That allows you to apply it in real test case studies and enhance you apility to generate SQL queries using different functions.
+This Challenge is so good for getting in the next level in SQL That allows you to apply it in real test case studies and enhance you apility to generate SQL queries using different functions Which you can find [here](https://8weeksqlchallenge.com/).
 ***
 ## Case Studies:
 
