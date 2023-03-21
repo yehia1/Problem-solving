@@ -32,14 +32,14 @@ Order by customer_id;
 
 ```
 SELECT
-  	distinct s.customer_id,
+    Distinct s.customer_id,
     m.product_name,
     order_date
 FROM dannys_diner.menu m
-inner join dannys_diner.sales s
-on s.product_id = m.product_id
-order by order_date
-limit 3;
+Inner Join dannys_diner.sales s
+On s.product_id = m.product_id
+Order By order_date
+Limit 3;
 ```
 | customer_id | product_name | order_date               |
 | ----------- | ------------ | ------------------------ |
@@ -49,7 +49,7 @@ limit 3;
 
 ## 4.What is the most purchased item on the menu and how many times was it purchased by all customers?
 ```
-with max_product as(
+With max_product as(
 Select product_name,count(s.product_id) as produts_count
 From sales s
 Inner Join menu m 
@@ -58,8 +58,8 @@ Group by product_name),
 
 max_product_name as(
 Select product_name
-from max_product
-where produts_count = (Select max(produts_count) from max_product))
+From max_product
+Where produts_count = (Select Max(produts_count) From max_product))
 
 Select customer_id,count(s.product_id)
 From sales s
