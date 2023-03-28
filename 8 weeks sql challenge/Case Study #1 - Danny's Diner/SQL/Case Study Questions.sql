@@ -176,7 +176,7 @@ Group by customer_id
 -- not just sushi - how many points do customer A and B have at the end of January?
 Select s.customer_id,sum(price) price_spent,
 		sum(case 
-            when order_date >= join_date then price * 20
+          when order_date >= join_date then price * 20
       		when product_name = 'sushi' then price * 20
       		else price * 10
       		end)
