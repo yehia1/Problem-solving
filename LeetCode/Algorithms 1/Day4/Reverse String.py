@@ -11,3 +11,13 @@ class Solution:
         list1 = list(reversed(s))
         for i in range(len(list1)):
             s[i] = list1[i]
+        
+    def reverseString(self, s: List[str]) -> None:
+        l = 0 
+        r = len(s) - 1
+        while(r > l):
+            temp = s[r]
+            s[r] = s[l]
+            s[l] = temp
+            r-=1
+            l+=1
